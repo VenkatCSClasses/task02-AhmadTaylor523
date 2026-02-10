@@ -1,0 +1,464 @@
+# tests.yaml
+
+
+tests:
+  
+  # getBalanceTest cases
+  
+  - name: getBalance_typicalPositiveInteger
+    input:
+      constructor:
+        email: "a@b.com"
+        startingBalance: 200.0
+      action: getBalance
+    output:
+      return: 200.0
+
+  - name: getBalance_zeroBalance
+    input:
+      constructor:
+        email: "zero@bal.com"
+        startingBalance: 0.0
+      action: getBalance
+    output:
+      return: 0.0
+
+  - name: getBalance_fractionalBalance
+    input:
+      constructor:
+        email: "frac@bal.com"
+        startingBalance: 12.34
+      action: getBalance
+    output:
+      return: 12.34
+
+  - name: getBalance_veryLargeBalance
+    input:
+      constructor:
+        email: "rich@bank.com"
+        startingBalance: 1000000000.0
+      action: getBalance
+    output:
+      return: 1000000000.0
+
+  - name: constructor_negativeStartingBalance_throws
+    input:
+      constructor:
+        email: "neg@bal.com"
+        startingBalance: -50.0
+    output:
+      throws: IllegalArgumentException
+
+  
+
+  
+  # withdrawTest cases
+  
+  - name: withdraw_validWithinBalance_reducesBalance
+    input:
+      constructor:
+        email: "a@b.com"
+        startingBalance: 200.0
+      action:
+        withdraw: 100.0
+      then:
+        getBalance: true
+    output:
+      return: 100.0
+
+  - name: withdraw_insufficientFunds_throws
+    input:
+      constructor:
+        email: "a@b.com"
+        startingBalance: 200.0
+      action:
+        withdraw: 300.0
+    output:
+      throws: InsufficientFundsException
+
+  - name: withdraw_equalToBalance_resultsZero
+    input:
+      constructor:
+        email: "a@b.com"
+        startingBalance: 200.0
+      action:
+        withdraw: 200.0
+      then:
+        getBalance: true
+    output:
+      return: 0.0
+
+  - name: withdraw_negativeAmount_throws
+    input:
+      constructor:
+        email: "a@b.com"
+        startingBalance: 200.0
+      action:
+        withdraw: -50.0
+    output:
+      throws: IllegalArgumentException
+
+  - name: withdraw_lessThanBalance_valid
+    input:
+      constructor:
+        email: "c@d.com"
+        startingBalance: 100.0
+      action:
+        withdraw: 50.0
+      then:
+        getBalance: true
+    output:
+      return: 50.0
+
+  - name: withdraw_greaterThanBalance_throws
+    input:
+      constructor:
+        email: "c@d.com"
+        startingBalance: 100.0
+      action:
+        withdraw: 100.0
+    output:
+      throws: InsufficientFundsException
+
+  - name: withdraw_tooSmall_threeDecimals_throws
+    input:
+      constructor:
+        email: "c@d.com"
+        startingBalance: 100.0
+      action:
+        withdraw: 0.001
+    output:
+      throws: IllegalArgumentException
+
+  - name: withdraw_boundary_justLessThanBalance
+    input:
+      constructor:
+        email: "c@d.com"
+        startingBalance: 100.0
+      action:
+        withdraw: 99.99
+      then:
+        getBalance: true
+    output:
+      return: 0.01
+
+  - name: withdraw_boundary_justGreaterThanBalance_throws
+    input:
+      constructor:
+        email: "c@d.com"
+        startingBalance: 100.0
+      action:
+        withdraw: 100.01
+    output:
+      throws: InsufficientFundsException
+
+  - name: withdraw_moreThanTwoDecimals_throws_1
+    input:
+      constructor:
+        email: "e@f.com"
+        startingBalance: 100.0
+      action:
+        withdraw: 0.111
+    output:
+      throws: IllegalArgumentException
+
+  - name: withdraw_negative_throws_2
+    input:
+      constructor:
+        email: "e@f.com"
+        startingBalance: 100.0
+      action:
+        withdraw: -10.0
+    output:
+      throws: IllegalArgumentException
+
+  - name: withdraw_moreThanTwoDecimals_throws_3
+    input:
+      constructor:
+        email: "e@f.com"
+        startingBalance: 100.0
+      action:
+        withdraw: 2.11001
+    output:
+      throws: IllegalArgumentException
+
+  - name: withdraw_negative_throws_4
+    input:
+      constructor:
+        email: "e@f.com"
+        startingBalance: 100.0
+      action:
+        withdraw: -1.0
+    output:
+      throws: IllegalArgumentException
+
+  
+  # isEmailValidTest cases
+  
+  - name: isEmailValid_validSimple
+    input:
+      staticCall:
+        method: isEmailValid
+        args: ["a@b.com"]
+    output:
+      return: true
+
+  - name: isEmailValid_emptyString
+    input:
+      staticCall:
+        method: isEmailValid
+        args: [""]
+    output:
+      return: false
+
+  - name: isEmailValid_consecutivePeriodsDomain
+    input:
+      staticCall:
+        method: isEmailValid
+        args: ["ab@s..com"]
+    output:
+      return: false
+
+  - name: isEmailValid_validHyphen
+    input:
+      staticCall:
+        method: isEmailValid
+        args: ["abc-d@mail.com"]
+    output:
+      return: true
+
+  - name: isEmailValid_startsWithDot
+    input:
+      staticCall:
+        method: isEmailValid
+        args: [".abc@mail.com"]
+    output:
+      return: false
+
+  - name: isEmailValid_containsHash
+    input:
+      staticCall:
+        method: isEmailValid
+        args: ["abc#def@h.com"]
+    output:
+      return: false
+
+  - name: isEmailValid_missingAt
+    input:
+      staticCall:
+        method: isEmailValid
+        args: ["heywassup.com"]
+    output:
+      return: false
+
+  - name: isEmailValid_doubleDotsMultiple
+    input:
+      staticCall:
+        method: isEmailValid
+        args: ["abc..def@mail..com"]
+    output:
+      return: false
+
+  
+  # constructorTest cases
+  
+  - name: constructor_valid_setsFields
+    input:
+      constructor:
+        email: "a@b.com"
+        startingBalance: 200.0
+      then:
+        getEmail: true
+        getBalance: true
+    output:
+      email: "a@b.com"
+      balance: 200.0
+
+  - name: constructor_invalidEmail_throws
+    input:
+      constructor:
+        email: ""
+        startingBalance: 100.0
+    output:
+      throws: IllegalArgumentException
+
+  - name: constructor_startingBalance_moreThan2Decimals_throws_1
+    input:
+      constructor:
+        email: "valid@mail.com"
+        startingBalance: 100.110111
+    output:
+      throws: IllegalArgumentException
+
+  - name: constructor_startingBalance_moreThan2Decimals_throws_2
+    input:
+      constructor:
+        email: "valid@email.com"
+        startingBalance: 100.001
+    output:
+      throws: IllegalArgumentException
+
+  - name: constructor_negativeStartingBalance_throws_2
+    input:
+      constructor:
+        email: "validemail2@gmail.com"
+        startingBalance: -100.0
+    output:
+      throws: IllegalArgumentException
+
+  - name: constructor_negativeStartingBalance_throws_3
+    input:
+      constructor:
+        email: "validemail12@gmail.com"
+        startingBalance: -1.0
+    output:
+      throws: IllegalArgumentException
+
+  
+  # isAmountValidTest cases
+  
+  - name: isAmountValid_valid
+    input:
+      staticCall:
+        method: isAmountValid
+        args: [100.0]
+    output:
+      return: true
+
+  - name: isAmountValid_zero
+    input:
+      staticCall:
+        method: isAmountValid
+        args: [0.0]
+    output:
+      return: true
+
+  - name: isAmountValid_negative
+    input:
+      staticCall:
+        method: isAmountValid
+        args: [-50.0]
+    output:
+      return: false
+
+  - name: isAmountValid_moreThan2Decimals
+    input:
+      staticCall:
+        method: isAmountValid
+        args: [10.999]
+    output:
+      return: false
+
+  
+  # depositTest cases
+  
+  - name: deposit_valid_increasesBalance
+    input:
+      constructor:
+        email: "test@example.com"
+        startingBalance: 100.0
+      action:
+        deposit: 50.0
+      then:
+        getBalance: true
+    output:
+      return: 150.0
+
+  - name: deposit_moreThan2Decimals_throws
+    input:
+      constructor:
+        email: "test@example.com"
+        startingBalance: 100.0
+      action:
+        deposit: 10.999
+    output:
+      throws: IllegalArgumentException
+
+  - name: deposit_negative_throws
+    input:
+      constructor:
+        email: "test@example.com"
+        startingBalance: 100.0
+      action:
+        deposit: -10.0
+    output:
+      throws: IllegalArgumentException
+
+  
+  # transferTest cases
+  
+  - name: transfer_valid_movesMoney
+    input:
+      accounts:
+        from:
+          email: "testA@example.com"
+          startingBalance: 100.0
+        to:
+          email: "testB@example.com"
+          startingBalance: 50.0
+      action:
+        transfer:
+          amount: 25.0
+      then:
+        fromGetBalance: true
+        toGetBalance: true
+    output:
+      fromBalance: 75.0
+      toBalance: 75.0
+
+  - name: transfer_nullDestination_throws
+    input:
+      constructor:
+        email: "testA@example.com"
+        startingBalance: 100.0
+      action:
+        transfer:
+          toAccount: null
+          amount: 10.0
+    output:
+      throws: IllegalArgumentException
+
+  - name: transfer_moreThan2Decimals_throws
+    input:
+      accounts:
+        from:
+          email: "testA@example.com"
+          startingBalance: 100.0
+        to:
+          email: "testB@example.com"
+          startingBalance: 50.0
+      action:
+        transfer:
+          amount: 15.999
+    output:
+      throws: IllegalArgumentException
+
+  - name: transfer_negative_throws
+    input:
+      accounts:
+        from:
+          email: "testA@example.com"
+          startingBalance: 100.0
+        to:
+          email: "testB@example.com"
+          startingBalance: 50.0
+      action:
+        transfer:
+          amount: -15.0
+    output:
+      throws: IllegalArgumentException
+
+  - name: transfer_insufficientFunds_throws
+    input:
+      accounts:
+        from:
+          email: "testA@example.com"
+          startingBalance: 100.0
+        to:
+          email: "testB@example.com"
+          startingBalance: 50.0
+      action:
+        transfer:
+          amount: 200.0
+    output:
+      throws: InsufficientFundsException
