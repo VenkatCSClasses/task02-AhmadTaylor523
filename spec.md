@@ -17,37 +17,60 @@ Balance: Must always be >= 0
 
 email must always be a valid email according to isEmailValid
 
-##Validation Rules
+## Validation Rules
 
-##isAmountValid
+public static boolean isAmountValid(double amount)
 
-An amount is valid if it is greate than 0, is a finite number
+Return True if:
+Double.isfinite(amount) is true, 
+amount > 0 
+The number has no more than 2 decimal places 
+Otherwise return false 
 
-Non-numeric or null is invalid
-
-##isEmailValid
+public static boolean isEmailValid (string email)
 
 An email is valid if it has exactly one '@', there is at least one character before the '@', it contains at least one "." after the '@', the "." isnt the final character, there isn't repeated special charcters
 
-"getEmail"
+## The 8 functions 
+
+*Constructor*
+public BankAccount(String email, double startingBalance)
+
+//Creates a new Account
+In order to do this it has to check isEmailValid(email) and isAmountValid(startingBalance). If these are bother true, then this.email = email, and this.balanace = startingBalance
+
+//IMPORTANT: if either one is false, then it will not create an object. 
+
+*getEmail*
 public String getEmail()
 Returns current email
 no side effects
 
-"Withdraw"
+*Withdraw*
 public void withdraw(double amount) throws InsufficientFundsException`
 Withdraws money from the account
 
-"Deposit"
+// It has to check isAmountValid(amount) in order to possibly do this. If the amount is a valid number but greater than the account balance, it will throw a insufficient funds exception. If no exception thrown, the balance will decrease by the amount. 
+
+
+*Deposit*
 public void deposit(double amount)
 Deposits money into the account
 
-"transfer"
+//This just does an isAmountValid(amount) to make sure it is a real number that someone can deposit. If it is balance += amount. If not it will throw illegalArgumentException
+
+
+*transfer*
 public void transfer(BankAccount toAccount, double amount) throws InsufficientFundsException
 Transfers money from this account to another account
 
+In order to do this it checks both : is Account null, isAmountValid just to try to withdraw. Once you get to withdraw it has it's own checks that could throw illegal argument exceptions. IF NONE are thrown, then it will withdraw from account 1 and deposit into account 2. 
 
+*isEmailValid* 
+-described above 
 
+*isAmountValid* 
+-described above 
 
 
 ## Example Scenarios 
@@ -62,6 +85,7 @@ new BankAccount("abc.com", 100) -> IllegalArgumentException (email invalid)
 ##withdraw 
 Boy = 50 Boy.withdraw(10) -> Boy.balance = 40
 Boy.withdraw(-1) -> IllegalArgumentException
+
 
 
 ##deposit
